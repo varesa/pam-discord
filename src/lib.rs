@@ -1,12 +1,16 @@
 #[macro_use] extern crate pam;
 extern crate rand;
+extern crate reqwest;
 
 use pam::module::{PamHandle, PamHooks};
 use pam::constants::{PamResultCode, PamFlag, PAM_PROMPT_ECHO_ON, PAM_TEXT_INFO};
 use pam::conv::PamConv;
 use rand::Rng;
+use reqwest::blocking::Client;
+use reqwest::StatusCode;
 use std::str::FromStr;
 use std::ffi::CStr;
+use std::fs;
 
 macro_rules! pam_try {
     ($e:expr) => (
@@ -43,17 +47,19 @@ impl PamHooks for PamSober {
         };
 
         let mut rng = rand::thread_rng();
-        let token = rng.gen::<u32>() % 100000;
+        let id = rng.gen::<u32>() % 1000;
+        let secret = rng.gen::<u32>() % 100000;
 
-        let debug = format!("DEBUG: Login token is: {}", token);
+        let client = reqwest::blocking::Client::new();
+        let url = fs::read_to_string("/etc/discord-url").expect("Error reading file");
+        let payload = [("content", format!("Login token #{}: {}", id, secret))];
+        client.post(&url).form(&payload).send().expect("Error sending token");
 
-        pam_try!(conv.send(PAM_TEXT_INFO, &debug));
-
-        let prompt = "Token: ";
+        let prompt = format!("Token #{}: ", id);
 
         let password = pam_try!(conv.send(PAM_PROMPT_ECHO_ON, &prompt));
 
-        if password.and_then(|p| u32::from_str(&p).ok()) == Some(token) {
+        if password.and_then(|p| u32::from_str(&p).ok()) == Some(secret) {
             return PamResultCode::PAM_SUCCESS;
         }
 

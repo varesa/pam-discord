@@ -2,6 +2,7 @@
 name = "pam-discord"
 version = "0.1.0"
 authors = ["Esa Varemo <esa@kuivanto.fi>"]
+edition = "2018"
 
 [lib]
 name = "pam_discord"
@@ -10,3 +11,4 @@ crate-type = ["cdylib"]
 [dependencies]
 pam = { git = "https://github.com/anowell/pam-rs", rev = "4bb68d314deadee0985c2f4f12cc952e5e17cd1e" }
 rand = "0.3.16"
+reqwest = { version = "0.10.8", features = ["blocking"] }
