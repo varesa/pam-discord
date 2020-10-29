@@ -2,7 +2,7 @@
 extern crate rand;
 
 use pam::module::{PamHandle, PamHooks};
-use pam::constants::{PamResultCode, PamFlag, PAM_PROMPT_ECHO_ON};
+use pam::constants::{PamResultCode, PamFlag, PAM_PROMPT_ECHO_ON, PAM_TEXT_INFO};
 use pam::conv::PamConv;
 use rand::Rng;
 use std::str::FromStr;
@@ -43,20 +43,21 @@ impl PamHooks for PamSober {
         };
 
         let mut rng = rand::thread_rng();
-        let a = rng.gen::<u32>() % 100;
-        let b = rng.gen::<u32>() % 100;
-        let math = format!("{} + {} = ", a, b);
+        let token = rng.gen::<u32>() % 100000;
 
-        // This println kinda helps debugging since the test script doesn't echo
-        println!("{}", math);
+        let debug = format!("DEBUG: Login token is: {}", token);
 
-        let password = pam_try!(conv.send(PAM_PROMPT_ECHO_ON, &math));
+        pam_try!(conv.send(PAM_TEXT_INFO, &debug));
 
-        if password.and_then(|p| u32::from_str(&p).ok()) == Some(a+b) {
+        let prompt = "Token: ";
+
+        let password = pam_try!(conv.send(PAM_PROMPT_ECHO_ON, &prompt));
+
+        if password.and_then(|p| u32::from_str(&p).ok()) == Some(token) {
             return PamResultCode::PAM_SUCCESS;
         }
 
-        println!("You failed the PAM sobriety test.");
+        println!("Invalid token.");
         return PamResultCode::PAM_AUTH_ERR;
     }
 

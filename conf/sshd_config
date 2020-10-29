@@ -1,0 +1,12 @@
+AuthenticationMethods keyboard-interactive:pam
+UsePAM yes
+ChallengeResponseAuthentication yes
+Include /etc/ssh/sshd_config.d/*.conf
+PubkeyAuthentication no
+AuthorizedKeysFile	.ssh/authorized_keys
+HostbasedAuthentication no
+PasswordAuthentication no
+PermitEmptyPasswords yes
+KerberosAuthentication no
+GSSAPIAuthentication no
+Subsystem	sftp	/usr/libexec/openssh/sftp-server
