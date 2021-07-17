@@ -1,3 +1,3 @@
-auth required libpam_discord.so
-account required libpam_discord.so
+auth required pam_discord.so
+account required pam_discord.so
 session required pam_permit.so
