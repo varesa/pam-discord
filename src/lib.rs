@@ -3,11 +3,9 @@ extern crate rand;
 extern crate reqwest;
 
 use pam::module::{PamHandle, PamHooks};
-use pam::constants::{PamResultCode, PamFlag, PAM_PROMPT_ECHO_ON, PAM_TEXT_INFO};
+use pam::constants::{PamResultCode, PamFlag, PAM_PROMPT_ECHO_ON};
 use pam::conv::PamConv;
 use rand::Rng;
-use reqwest::blocking::Client;
-use reqwest::StatusCode;
 use std::str::FromStr;
 use std::ffi::CStr;
 use std::fs;
@@ -30,14 +28,12 @@ macro_rules! pam_try {
     );
 }
 
-struct PamSober;
-pam_hooks!(PamSober);
+struct PamDiscord;
+pam_hooks!(PamDiscord);
 
-impl PamHooks for PamSober {
+impl PamHooks for PamDiscord {
     // This function performs the task of authenticating the user.
     fn sm_authenticate(pamh: &PamHandle, _args: Vec<&CStr>, _flags: PamFlag) -> PamResultCode {
-        println!("Let's make sure you're sober enough to perform basic addition");
-
         let conv = match pamh.get_item::<PamConv>() {
             Ok(conv) => conv,
             Err(err) => {
